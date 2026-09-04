@@ -1,0 +1,172 @@
+/* Codex 配置中心：四张卡（主题/宠物/灵动岛/看板）。
+   状态条与徽标复用工单页那套 .jira-state / .acc-msg，这里只补卡片与行。 */
+
+.cfg-grid {
+  display: grid; gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  align-items: start;
+}
+
+.cfg-card {
+  display: flex; flex-direction: column;
+  background: var(--surface-3); border: 1px solid var(--border-soft);
+  border-radius: var(--radius-lg); overflow: hidden;
+}
+.cfg-card-head {
+  display: flex; align-items: baseline; gap: 8px;
+  padding: 11px 14px; border-bottom: 1px solid var(--border-soft);
+  background: var(--surface-1);
+}
+.cfg-card-head b { font-size: 13.5px; }
+.cfg-sub { font-size: 11.5px; color: var(--text-3); }
+.cfg-card-body { padding: 10px 14px; display: flex; flex-direction: column; gap: 6px; }
+.cfg-card-foot {
+  padding: 8px 14px; border-top: 1px dashed var(--border-soft);
+  font-size: 11.5px; color: var(--text-3); line-height: 1.6;
+}
+.cfg-note { margin-top: 6px; }
+
+.cfg-kv { display: flex; align-items: baseline; gap: 10px; font-size: 12.5px; }
+/* 88px：容得下「旧 dashi 看板」「它的开机自启」这类最长的标签，再窄就换行折成两排 */
+.cfg-kv > span { width: 88px; flex: none; color: var(--text-3); }
+.cfg-kv > b { color: var(--text); font-weight: 600; display: flex; align-items: center; gap: 8px; }
+.cfg-ok { color: var(--green); }
+.cfg-warn { color: var(--amber); }
+
+.cfg-row {
+  display: flex; align-items: center; gap: 8px; padding: 6px 8px;
+  border: 1px solid var(--border-soft); border-radius: 9px; background: var(--surface-1);
+}
+.cfg-row.is-on { border-color: var(--brand); background: var(--brand-soft); }
+.cfg-row.is-busy { opacity: .55; }
+.cfg-row-name { font-size: 12.5px; font-weight: 600; white-space: nowrap; }
+.cfg-row-path {
+  flex: 1; min-width: 0; font-size: 11px; color: var(--text-3);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font-family: ui-monospace, Consolas, monospace;
+}
+.cfg-tag {
+  padding: 1px 7px; border-radius: 6px; font-size: 11px; white-space: nowrap;
+  background: var(--brand-soft); color: var(--brand);
+}
+.cfg-empty {
+  padding: 14px; text-align: center; font-size: 12.5px; color: var(--text-2);
+  border: 1px dashed var(--border); border-radius: 10px;
+}
+
+/* 主题预览：后端压好的缩略图内联进来（原画三五百 KB，手机上等不起） */
+.cfg-peek { padding: 2px 0 4px; }
+.cfg-peek img {
+  width: 100%; display: block; border-radius: 9px; border: 1px solid var(--border-soft);
+}
+
+/* 主题调节器：元数据、10 色、文案和 Safe CSS 注册部件都在这里。 */
+.cfg-theme-editor { grid-column: 1 / -1; }
+.cfg-editor-body { gap: 10px; }
+.cfg-editor-actions {
+  position: sticky; top: 0; z-index: 3;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 8px 10px; margin: -2px 0 2px;
+  border: 1px solid var(--border-soft); border-radius: 10px;
+  background: color-mix(in srgb, var(--surface-1) 94%, transparent);
+  backdrop-filter: blur(10px);
+}
+.cfg-editor-actions > div { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; }
+.cfg-editor-section {
+  border: 1px solid var(--border-soft); border-radius: 10px; background: var(--surface-1);
+}
+.cfg-editor-section > summary {
+  cursor: pointer; padding: 9px 11px; font-size: 12.5px; font-weight: 700;
+  color: var(--text); user-select: none;
+}
+.cfg-editor-section[open] > summary { border-bottom: 1px solid var(--border-soft); }
+.cfg-editor-section > :not(summary) { margin-left: 11px; margin-right: 11px; }
+.cfg-editor-section > :last-child { margin-bottom: 11px; }
+.cfg-help { margin-top: 9px; font-size: 11.5px; line-height: 1.65; color: var(--text-3); }
+
+.cfg-form-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 8px 10px;
+  padding-top: 10px;
+}
+.cfg-field, .cfg-color-field { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.cfg-field > span, .cfg-color-field > span { font-size: 11.5px; color: var(--text-3); }
+.cfg-field input, .cfg-field select, .cfg-color-field input[type="text"],
+.cfg-style-row input, .cfg-style-add select {
+  width: 100%; min-width: 0; box-sizing: border-box; padding: 6px 8px;
+  border: 1px solid var(--border); border-radius: 7px;
+  background: var(--surface-2); color: var(--text); font: inherit;
+}
+.cfg-field input[readonly] { color: var(--text-3); background: var(--surface-1); }
+.cfg-field input:focus, .cfg-field select:focus, .cfg-color-field input:focus,
+.cfg-style-row input:focus, .cfg-style-add select:focus {
+  outline: 2px solid color-mix(in srgb, var(--brand) 25%, transparent);
+  border-color: var(--brand);
+}
+
+.cfg-background-editor {
+  display: grid; grid-template-columns: minmax(260px, 1.4fr) minmax(210px, .8fr);
+  gap: 12px; align-items: center; padding-top: 10px;
+}
+.cfg-background-preview img {
+  display: block; width: 100%; max-height: 310px; object-fit: contain;
+  border: 1px solid var(--border-soft); border-radius: 9px; background: var(--surface-2);
+}
+.cfg-background-editor .cfg-kv { margin-bottom: 7px; }
+.cfg-background-editor .cfg-kv > b {
+  min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+.cfg-color-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 8px 10px; padding-top: 10px;
+}
+.cfg-color-field > div { display: grid; grid-template-columns: 34px 1fr; gap: 6px; }
+.cfg-color-field input[type="color"] {
+  width: 34px; height: 31px; padding: 2px; border: 1px solid var(--border);
+  border-radius: 7px; background: var(--surface-2); cursor: pointer;
+}
+.cfg-color-field input[type="text"], .cfg-style-row input {
+  font-family: ui-monospace, Consolas, monospace; font-size: 11.5px;
+}
+
+.cfg-style-parts { display: grid; gap: 7px; padding-top: 2px; }
+.cfg-style-part {
+  border: 1px solid var(--border-soft); border-radius: 9px; background: var(--surface-2);
+}
+.cfg-style-part > summary {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 10px;
+  cursor: pointer; padding: 8px 10px; font-size: 12px; user-select: none;
+}
+.cfg-style-part > summary span { color: var(--text-3); font: 10.5px ui-monospace, Consolas, monospace; }
+.cfg-style-part[open] > summary { border-bottom: 1px solid var(--border-soft); }
+.cfg-style-part-body {
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; padding: 9px;
+}
+.cfg-style-state {
+  display: flex; flex-direction: column; gap: 6px; min-width: 0;
+  padding: 8px; border: 1px dashed var(--border-soft); border-radius: 8px;
+  background: var(--surface-1);
+}
+.cfg-style-state > b { font-size: 11.5px; color: var(--text-2); }
+.cfg-style-row {
+  display: grid; grid-template-columns: minmax(82px, .8fr) minmax(120px, 1.5fr) 28px;
+  gap: 5px; align-items: center;
+}
+.cfg-style-row > span {
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font-size: 10.5px; color: var(--text-3);
+}
+.cfg-style-row input { padding: 5px 6px; }
+.cfg-style-row .cfg-remove { width: 28px; min-width: 28px; padding: 4px 0; color: var(--red); }
+.cfg-style-add { display: grid; grid-template-columns: 1fr auto; gap: 5px; margin-top: 2px; }
+.cfg-style-add select { padding: 5px 6px; font-size: 10.5px; }
+.cfg-style-empty { font-size: 10.5px; line-height: 1.5; color: var(--text-3); }
+
+@media (max-width: 720px) {
+  .cfg-grid { grid-template-columns: 1fr; }
+  .cfg-kv > span { width: 66px; }
+  .cfg-editor-actions { position: static; align-items: flex-start; flex-direction: column; }
+  .cfg-editor-actions > div { justify-content: flex-start; }
+  .cfg-background-editor { grid-template-columns: 1fr; }
+  .cfg-style-part-body { grid-template-columns: 1fr; }
+}

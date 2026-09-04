@@ -1,0 +1,338 @@
+/* ==================== 任务面板（团队版看板） ====================
+   配 board.js。沿用控制台晨雾浅色主题的 --surface/--border/--text/--brand 体系，
+   只补看板自己的列、卡片、抽屉、建卡弹窗与 toast；基础 .btn 在 styles.css。 */
+
+#boardRoot { display:flex; flex-direction:column; gap:10px; }
+
+/* ---------- 工具栏 ---------- */
+.bd-toolbar {
+  display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+}
+.bd-toolbar-left,.bd-toolbar-right { display:flex; align-items:center; gap:9px; }
+.bd-toolbar-right { margin-left:auto; }
+.bd-sync { font-size:12px; color:var(--text-3); font-variant-numeric:tabular-nums; }
+.bd-mode {
+  padding:2px 9px; border-radius:999px; font-size:11px; font-weight:700; letter-spacing:.4px;
+  background:rgba(217,119,6,.14); color:var(--amber); border:1px solid rgba(217,119,6,.3);
+}
+.bd-banner {
+  padding:8px 12px; border-radius:8px; font-size:12px;
+  background:rgba(239,68,68,.1); color:#b91c1c; border:1px solid rgba(239,68,68,.28);
+}
+
+.bd-input,.bd-select,.bd-textarea {
+  height:32px; padding:0 11px; border:1px solid var(--border); border-radius:9px;
+  background:var(--surface-3); color:var(--text); font-size:13px; font-family:inherit;
+  transition:border-color .15s,box-shadow .15s;
+}
+.bd-input::placeholder,.bd-textarea::placeholder { color:var(--text-3); }
+.bd-input:hover,.bd-select:hover,.bd-textarea:hover { border-color:var(--brand); }
+.bd-input:focus,.bd-select:focus,.bd-textarea:focus {
+  outline:none; border-color:var(--brand); box-shadow:0 0 0 3px var(--brand-soft);
+}
+.bd-select { cursor:pointer; min-width:150px; }
+.bd-textarea {
+  height:auto; min-height:76px; padding:9px 12px; line-height:1.6; resize:vertical; width:100%;
+}
+.bd-multi { height:auto; min-height:84px; padding:6px; }
+
+/* ---------- 列 ---------- */
+.bd-cols {
+  display:flex; gap:12px; align-items:stretch;
+  height:calc(100vh - 246px); min-height:360px;
+  overflow-x:auto; overflow-y:hidden; padding-bottom:8px;
+  scroll-snap-type:x proximity;
+}
+/* 宽屏六列平分、正好铺满；窄到每列 212px 以下就不再压缩，改成横向滚动 */
+.bd-col {
+  flex:1 1 0; min-width:212px; scroll-snap-align:start;
+  display:flex; flex-direction:column; min-height:0;
+  border:1px solid var(--border-soft); border-radius:12px; background:var(--surface-1);
+}
+.bd-col-head {
+  display:flex; align-items:center; gap:8px; padding:9px 12px;
+  border-bottom:1px solid var(--border-soft);
+}
+.bd-col-name { font-size:13px; font-weight:700; letter-spacing:.2px; color:var(--text); }
+.bd-col-pick {
+  margin-left:auto; padding:0 7px; height:20px; border:1px solid var(--border);
+  border-radius:999px; background:var(--surface-3); color:var(--text-2);
+  font-size:11px; cursor:pointer; line-height:18px;
+}
+.bd-col-pick:hover { border-color:var(--brand); color:var(--brand); }
+.bd-col-cnt {
+  min-width:20px; padding:0 6px; text-align:center; border-radius:999px;
+  background:var(--surface-4); color:var(--text-2); font-size:11px; line-height:18px;
+  font-variant-numeric:tabular-nums;
+}
+/* 六列各给一条顶色，横向滚动时不用读字也知道滚到哪儿了 */
+.bd-col-head { border-top:2px solid transparent; border-radius:12px 12px 0 0; }
+.bd-col-backlog .bd-col-head { border-top-color:#c3c8d8; }
+.bd-col-todo .bd-col-head { border-top-color:var(--blue); }
+.bd-col-in_progress .bd-col-head { border-top-color:var(--brand); }
+.bd-col-in_review .bd-col-head { border-top-color:var(--amber); }
+.bd-col-done .bd-col-head { border-top-color:var(--green); }
+.bd-col-blocked .bd-col-head { border-top-color:var(--red); }
+
+.bd-col-body {
+  display:flex; flex-direction:column; gap:8px; padding:10px;
+  overflow-y:auto; min-height:90px;
+}
+.bd-col-empty {
+  padding:18px 0; text-align:center; color:var(--text-3); font-size:12px;
+  border:1px dashed var(--border); border-radius:10px;
+}
+
+/* ---------- 卡片 ---------- */
+.bd-card {
+  display:flex; flex-direction:column; gap:7px; padding:10px 11px; cursor:pointer;
+  border:1px solid var(--border); border-radius:11px; background:var(--surface-3);
+  box-shadow:0 1px 2px rgba(31,36,48,.04);
+  transition:border-color .15s,box-shadow .15s,transform .12s;
+}
+.bd-card:hover { border-color:var(--brand); box-shadow:0 3px 10px rgba(79,91,240,.12); }
+.bd-card.is-picked { border-color:var(--brand); background:var(--brand-soft); }
+.bd-pick { flex:none; display:flex; align-items:center; padding-top:2px; cursor:pointer; }
+.bd-pick input { cursor:pointer; }
+.bd-card:focus-visible { outline:2px solid var(--brand); outline-offset:1px; }
+.bd-card:active { transform:translateY(1px); }
+.bd-card-top { display:flex; align-items:flex-start; gap:7px; }
+.bd-card-title {
+  flex:1; min-width:0; font-size:13px; font-weight:650; line-height:1.4; color:var(--text);
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+}
+.bd-card-meta { display:flex; align-items:center; gap:5px; flex-wrap:wrap; }
+.bd-card-blocked { font-size:11.5px; color:var(--red); }
+.bd-card-foot {
+  display:flex; align-items:center; gap:8px;
+  padding-top:6px; border-top:1px dashed var(--border-soft);
+}
+.bd-card-act {
+  flex:1; min-width:0; font-size:11.5px; color:var(--text-2);
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.bd-card-time { font-size:11px; color:var(--text-3); white-space:nowrap; }
+
+.bd-chip {
+  padding:1px 7px; border-radius:6px; font-size:11px; line-height:17px;
+  background:var(--surface-4); color:var(--text-2);
+}
+.bd-chip-soft { background:transparent; border:1px solid var(--border); color:var(--text-3); }
+
+.bd-pr {
+  flex:none; padding:1px 7px; border-radius:6px; font-size:11px; font-weight:700; line-height:17px;
+}
+.bd-pr.pr-high { background:rgba(220,38,38,.12); color:var(--red); }
+.bd-pr.pr-normal { background:var(--brand-soft); color:var(--brand); }
+.bd-pr.pr-low { background:var(--surface-4); color:var(--text-3); }
+
+/* agent 徽标：cursor 紫 / codex 黑 / 未领灰 */
+.bd-agent {
+  max-width:150px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  padding:1px 8px; border-radius:999px; font-size:11px; line-height:17px; font-weight:600;
+}
+.bd-agent.ag-cursor { background:rgba(124,92,240,.14); color:#6d43e0; border:1px solid rgba(124,92,240,.28); }
+.bd-agent.ag-codex { background:rgba(31,36,48,.9); color:#fff; border:1px solid #1f2430; }
+.bd-agent.ag-none { background:var(--surface-4); color:var(--text-3); border:1px solid var(--border); }
+
+.bd-status { padding:2px 9px; border-radius:999px; font-size:11px; font-weight:700; }
+.bd-status.st-backlog { background:var(--surface-4); color:var(--text-2); }
+.bd-status.st-todo { background:rgba(37,99,235,.12); color:var(--blue); }
+.bd-status.st-in_progress { background:var(--brand-soft); color:var(--brand); }
+.bd-status.st-in_review { background:rgba(217,119,6,.14); color:var(--amber); }
+.bd-status.st-done { background:rgba(23,146,92,.14); color:var(--green); }
+.bd-status.st-blocked { background:rgba(220,38,38,.12); color:var(--red); }
+
+/* ---------- 详情抽屉 ---------- */
+.bd-drawer-mask {
+  position:fixed; inset:0; z-index:60; background:rgba(15,18,28,.32); backdrop-filter:blur(1px);
+}
+.bd-drawer {
+  position:fixed; top:0; right:0; bottom:0; z-index:61; width:min(460px,100vw);
+  display:flex; flex-direction:column;
+  background:var(--surface-3); border-left:1px solid var(--border);
+  box-shadow:-10px 0 30px rgba(31,36,48,.14);
+}
+.bd-drawer-head {
+  display:flex; align-items:flex-start; gap:10px; padding:14px 16px;
+  border-bottom:1px solid var(--border-soft);
+}
+.bd-drawer-head-main { flex:1; min-width:0; display:flex; flex-direction:column; gap:7px; }
+.bd-drawer-title { font-size:15px; font-weight:700; line-height:1.4; color:var(--text); }
+.bd-drawer-sub { display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+.bd-drawer-body { flex:1; overflow-y:auto; padding:14px 16px; display:flex; flex-direction:column; gap:16px; }
+.bd-drawer-foot {
+  display:flex; align-items:center; gap:9px; padding:11px 16px;
+  border-top:1px solid var(--border-soft); background:var(--surface-1);
+}
+.bd-drawer-foot .bd-muted { flex:1; min-width:0; }
+.bd-x {
+  flex:none; width:26px; height:26px; border:0; border-radius:7px; cursor:pointer;
+  background:transparent; color:var(--text-3); font-size:17px; line-height:1;
+}
+.bd-x:hover { background:var(--surface-4); color:var(--text); }
+
+.bd-sec { display:flex; flex-direction:column; gap:8px; }
+.bd-sec-t { font-size:12px; font-weight:700; color:var(--text-3); letter-spacing:.4px; }
+.bd-desc {
+  font-size:13px; line-height:1.75; color:var(--text-2); white-space:pre-wrap;
+  user-select:text;
+}
+.bd-muted { font-size:12px; color:var(--text-3); }
+.bd-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px 14px; }
+.bd-meta { display:flex; flex-direction:column; gap:2px; min-width:0; }
+.bd-meta span { font-size:11px; color:var(--text-3); }
+.bd-meta b {
+  font-size:12.5px; font-weight:600; color:var(--text);
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap; user-select:text;
+}
+
+.bd-events { list-style:none; display:flex; flex-direction:column; gap:9px; }
+.bd-event { display:flex; gap:9px; }
+.bd-event-ic {
+  flex:none; width:22px; height:22px; border-radius:50%; display:flex;
+  align-items:center; justify-content:center; font-size:11px;
+  background:var(--surface-4); color:var(--text-2);
+}
+.bd-event.ev-zt .bd-event-ic { background:var(--brand-soft); color:var(--brand); }
+.bd-event.ev-review .bd-event-ic { background:rgba(23,146,92,.14); color:var(--green); }
+.bd-event.ev-release .bd-event-ic { background:rgba(220,38,38,.12); color:var(--red); }
+.bd-event-main { flex:1; min-width:0; }
+.bd-event-txt { font-size:12.5px; line-height:1.6; color:var(--text); word-break:break-word; user-select:text; }
+.bd-event-sub { font-size:11px; color:var(--text-3); margin-top:1px; }
+.bd-comment-act { display:flex; justify-content:flex-end; }
+
+/* ---------- 建卡弹窗 ---------- */
+.bd-modal-mask {
+  position:fixed; inset:0; z-index:70; display:flex; align-items:center; justify-content:center;
+  padding:20px; background:rgba(15,18,28,.36);
+}
+.bd-modal {
+  width:min(520px,100%); max-height:86vh; display:flex; flex-direction:column;
+  background:var(--surface-3); border:1px solid var(--border); border-radius:14px;
+  box-shadow:0 18px 50px rgba(31,36,48,.22);
+}
+.bd-modal-head {
+  display:flex; align-items:center; gap:10px; padding:13px 16px;
+  border-bottom:1px solid var(--border-soft);
+}
+.bd-modal-head b { flex:1; font-size:14px; }
+.bd-modal-body { flex:1; overflow-y:auto; padding:14px 16px; display:flex; flex-direction:column; gap:12px; }
+.bd-modal-foot {
+  display:flex; align-items:center; gap:9px; padding:11px 16px;
+  border-top:1px solid var(--border-soft); background:var(--surface-1);
+}
+.bd-modal-foot .bd-muted { flex:1; min-width:0; }
+.bd-fld { display:flex; flex-direction:column; gap:5px; min-width:0; }
+.bd-fld > span { font-size:12px; color:var(--text-2); }
+.bd-fld > span i { color:var(--red); font-style:normal; margin-left:2px; }
+.bd-fld-row { display:flex; gap:12px; }
+.bd-fld-row .bd-fld { flex:1; }
+
+/* ---------- toast ---------- */
+#bdToastWrap {
+  position:fixed; right:18px; bottom:18px; z-index:90;
+  display:flex; flex-direction:column; gap:8px; align-items:flex-end;
+}
+.bd-toast {
+  max-width:340px; padding:8px 13px; border-radius:9px; font-size:12.5px;
+  background:var(--surface-3); color:var(--text);
+  border:1px solid var(--border); box-shadow:0 6px 18px rgba(31,36,48,.14);
+  opacity:0; transform:translateY(6px); transition:opacity .2s,transform .2s;
+}
+.bd-toast.show { opacity:1; transform:none; }
+.bd-toast.ok { border-color:rgba(23,146,92,.4); color:var(--green); }
+.bd-toast.warn { border-color:rgba(217,119,6,.4); color:var(--amber); }
+.bd-toast.err { border-color:rgba(220,38,38,.4); color:#b91c1c; }
+
+.bd-archived-toggle {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 12px; color: var(--text-3); cursor: pointer; white-space: nowrap;
+}
+.bd-bulk {
+  display:flex; align-items:center; gap:10px; padding:8px 12px;
+  border:1px solid var(--border); border-radius:11px; background:var(--surface-3);
+  box-shadow:0 2px 10px rgba(31,36,48,.06);
+}
+.bd-bulk[hidden] { display:none; }
+.bd-bulk > span { font-size:13px; font-weight:600; }
+.bd-bulk .btn { margin-left:0; }
+.bd-bulk .btn:last-child { margin-left:auto; }
+.bd-send-chips { display:flex; flex-wrap:wrap; gap:5px; margin-top:6px; }
+.bd-send-chip {
+  max-width:240px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  padding:1px 8px; border-radius:6px; background:var(--surface-4);
+  color:var(--text-2); font-size:11.5px;
+}
+
+/* ---------- 派给在线 agent ---------- */
+.bd-send-card {
+  display: flex; flex-direction: column; gap: 3px; padding: 9px 11px;
+  border: 1px solid var(--border-soft); border-radius: 10px; background: var(--surface-1);
+}
+.bd-send-card b { font-size: 13px; }
+.bd-sess-list { display: flex; flex-direction: column; gap: 6px; max-height: 240px; overflow-y: auto; }
+.bd-sess {
+  display: flex; align-items: center; gap: 8px; padding: 8px 10px; cursor: pointer;
+  border: 1px solid var(--border); border-radius: 9px; background: var(--surface-1);
+}
+.bd-sess:hover { border-color: var(--brand); }
+.bd-sess-name { font-size: 13px; font-weight: 600; white-space: nowrap; }
+.bd-sess-cwd {
+  flex: 1; min-width: 0; font-size: 11px; color: var(--text-3);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font-family: ui-monospace, Consolas, monospace;
+}
+.bd-sess-pending { font-size: 11px; color: var(--amber); white-space: nowrap; }
+.bd-sess-idle { font-size: 11px; color: var(--text-3); white-space: nowrap; }
+.bd-sess-empty {
+  padding: 16px; text-align: center; font-size: 12.5px; color: var(--text-2);
+  border: 1px dashed var(--border); border-radius: 10px;
+}
+
+/* ---------- 手机窄屏（Tailscale 远程常用） ---------- */
+@media (max-width:720px) {
+  .bd-toolbar-right { width:100%; margin-left:0; }
+  .bd-cols { height:calc(100vh - 300px); }
+  .bd-col { flex:0 0 80vw; min-width:80vw; }
+  .bd-drawer { width:100vw; }
+  .bd-grid { grid-template-columns:1fr; }
+  .bd-fld-row { flex-direction:column; }
+  #bdToastWrap { left:12px; right:12px; align-items:stretch; }
+  .bd-toast { max-width:none; }
+}
+
+/* 复核结论：别的 agent 替 rxyy 先验的那一道。他在手机上扫一眼就要能拍板，
+   所以结论和理由都露在卡面上，不藏进流水 */
+.bd-card-review {
+  margin-top: 6px; padding: 6px 8px; border-radius: 8px;
+  font-size: 11.5px; line-height: 1.5;
+  border: 1px solid transparent;
+}
+.bd-card-review.is-pass {
+  background: rgba(52, 199, 123, .10); border-color: rgba(52, 199, 123, .28); color: #1f7a4d;
+}
+.bd-card-review.is-fail {
+  background: rgba(229, 72, 77, .10); border-color: rgba(229, 72, 77, .28); color: #a3282c;
+}
+.bd-card-review b { font-weight: 600; }
+.bd-review-by { margin-left: 6px; opacity: .75; }
+.bd-review-txt {
+  margin-top: 3px; color: var(--text-2);
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+}
+.bd-drawer-body .bd-card-review { margin-top: 0; }
+.bd-drawer-body .bd-review-txt { -webkit-line-clamp: unset; }
+
+/* 手机上的两处让路（rxyy 在外面就是拿手机看板，这几行屏很值钱）
+   ① 抽屉一开就把远程页那个汉堡按钮收起来：它是 fixed z-index:70、盖在抽屉(61)
+      标题上，实测「看板嵌入 Codex 侧栏」开头两个字被挡住；抽屉自带关闭叉，
+      这时候也不需要切页按钮
+   ② 顶部那段说明在窄屏占八行，把看板整个挤到屏幕下半截，只留两行 */
+@media (max-width: 720px) {
+  body:has(#bdDrawer:not([hidden])) .remote-navbtn { display: none; }
+  .page[data-page="board"] .page-head p {
+    display: -webkit-box; -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical; overflow: hidden;
+  }
+}

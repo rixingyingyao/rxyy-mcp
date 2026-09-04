@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>rxyy mcp</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="board.css">
+</head>
+<body>
+<div id="app">
+  <aside id="sidebar">
+    <div class="brand">
+      <div class="brand-text">
+        <div class="brand-name">rxyy mcp</div>
+        <div class="brand-sub">agent 远程控制台</div>
+      </div>
+    </div>
+    <nav class="nav">
+      <div class="nav-group">
+        <div class="nav-title">核心</div>
+        <button class="nav-item active" data-page="mcp"><span>MCP 控制台</span></button>
+        <button class="nav-item" data-page="board"><span>验收看板</span></button>
+        <button class="nav-item" data-page="projects"><span>项目管理</span></button>
+      </div>
+      <div class="nav-group">
+        <div class="nav-title">通用</div>
+        <button class="nav-item" data-page="env"><span>环境自检</span></button>
+        <button class="nav-item" data-page="settings"><span>设置</span></button>
+      </div>
+    </nav>
+  </aside>
+  <div id="sideGrip"></div>
+  <main id="content" class="flush">
+    <section class="page mcp-page active" data-page="mcp">
+      <div id="mcp-mount" class="mcp-mount"></div>
+    </section>
+    <section class="page" data-page="board">
+      <div class="page-head"><h1>验收看板</h1><p>全 agent 共用：建卡 → 领卡 → 交付 → 你点验收才算 done。</p></div>
+      <div id="boardRoot"></div>
+    </section>
+    <section class="page" data-page="projects">
+      <div class="page-head"><h1>项目管理</h1><p>扫描本机桌面下的 git 仓库，启用后纳入列表。</p></div>
+      <div class="acc-toolbar">
+        <div class="acc-toolbar-actions">
+          <button class="btn btn-forge" id="projScan">扫描桌面</button>
+          <button class="btn" id="projAdd">+ 手动添加</button>
+          <button class="btn btn-ghost" id="projReload">刷新</button>
+        </div>
+      </div>
+      <div id="projMsg" class="acc-msg"></div>
+      <div class="acc-table-wrap">
+        <table class="acc-table">
+          <thead><tr><th>项目</th><th>路径</th><th>分支</th><th>启用</th></tr></thead>
+          <tbody id="projBody"><tr><td colspan="4" class="acc-empty">点「扫描桌面」加载</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+    <section class="page" data-page="env">
+      <div class="page-head"><h1>环境自检</h1><p>只读检查：MCP 接入、hub 是否在跑、WebView2。</p></div>
+      <button class="btn btn-forge" id="envRun">开始自检</button>
+      <pre id="envOut" class="acc-msg" style="white-space:pre-wrap;margin-top:12px"></pre>
+    </section>
+    <section class="page" data-page="settings">
+      <div class="page-head"><h1>设置</h1><p>可选：百炼兼容 API（环境变量 DASHSCOPE_API_KEY 也可）。</p></div>
+      <div class="oa-form">
+        <div class="oa-row"><label>API Key</label><input id="setKey" class="oa-input" type="password"></div>
+        <div class="oa-row"><label>Base URL</label><input id="setBase" class="oa-input"></div>
+        <div class="oa-row"><label>模型</label><input id="setModel" class="oa-input"></div>
+        <div class="oa-row"><label>扫描根目录</label><input id="setDesk" class="oa-input"></div>
+        <div class="oa-actions"><button class="btn btn-forge" id="setSave">保存</button></div>
+        <div id="setMsg" class="acc-msg"></div>
+      </div>
+    </section>
+  </main>
+</div>
+<script src="board.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

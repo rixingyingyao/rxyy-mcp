@@ -1,0 +1,63 @@
+{
+  "name": "rxyy_mcp-extbus",
+  "displayName": "rxyy-mcp · 窗口总线",
+  "description": "让rxyy-mcp 的 hub 能在这个 Cursor 窗口里无头开新对话 / 把对话调到前台。只做文件命令泵，不改 Cursor 任何安装文件、不写工作区规则。",
+  "version": "0.1.0",
+  "publisher": "rxyy",
+  "license": "MIT",
+  "private": true,
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "rxyy_mcp.extbus.status",
+        "title": "rxyy-mcp 窗口总线：查看本窗口状态"
+      },
+      {
+        "command": "rxyy_mcp.extbus.pumpNow",
+        "title": "rxyy-mcp 窗口总线：立刻处理一次待办命令"
+      }
+    ],
+    "configuration": {
+      "title": "rxyy-mcp 窗口总线",
+      "properties": {
+        "rxyy_mcp.extbus.root": {
+          "type": "string",
+          "default": "",
+          "description": "总线根目录。留空 = %LOCALAPPDATA%\\rxyy-mcp\\extbus（与 hub 同口径）。"
+        },
+        "rxyy_mcp.extbus.pumpIntervalMs": {
+          "type": "number",
+          "default": 1000,
+          "minimum": 200,
+          "description": "多久看一次收件箱（毫秒）。"
+        },
+        "rxyy_mcp.extbus.createCommand": {
+          "type": "string",
+          "default": "composer.createNew",
+          "description": "Cursor 私有命令：无头新建对话。Cursor 升版改名时在这里跟。"
+        },
+        "rxyy_mcp.extbus.orderedIdsCommand": {
+          "type": "string",
+          "default": "composer.getOrderedSelectedComposerIds",
+          "description": "Cursor 私有命令：列出已挂载的对话 id，用来确认新对话真的开出来了。"
+        },
+        "rxyy_mcp.extbus.openCommands": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": ["aichat.openAgentById", "composer.openComposer"],
+          "description": "Cursor 私有命令：把某个对话调到前台，依次尝试，谁成了算谁。"
+        }
+      }
+    }
+  }
+}

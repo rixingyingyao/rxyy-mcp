@@ -1,0 +1,4 @@
+pywebview>=5.0
+markdown>=3.5
+segno>=1.6
+cursor-sdk>=1.0.24
