@@ -15,7 +15,7 @@ import hub
 WS1 = r"d:\Desktop\cursor工作流"
 WS2 = r"c:\Users\Administrator\AICodebrain"
 PACKED = WS1 + r"\dist\rxyy-tools\_internal\rxyy-mcp"
-LIVE_RESIDENT = r"C:\Users\sunrise\AppData\Local\rxyy-tools\live\rxyy-mcp"
+LIVE_RESIDENT = r"C:\Users\TestUser\AppData\Local\rxyy-tools\live\rxyy-mcp"
 
 
 class SanitizeWsPathTests(unittest.TestCase):
@@ -34,13 +34,13 @@ class SanitizeWsPathTests(unittest.TestCase):
         self.assertEqual(r"dist\rxyy-tools", hub.sanitize_ws_path(r"dist\rxyy-tools"))
 
     def test_live_resident_path_is_rejected_not_kept_as_workspace(self):
-        live = r"C:\Users\sunrise\AppData\Local\rxyy-tools\live\rxyy-mcp"
+        live = r"C:\Users\TestUser\AppData\Local\rxyy-tools\live\rxyy-mcp"
         self.assertTrue(hub.is_runtime_ws_path(live))
         self.assertEqual("", hub.sanitize_ws_path(live))
         self.assertFalse(hub.is_runtime_ws_path(WS1))
 
     def test_scrub_runtime_team_cfg_drops_live_roots(self):
-        live = r"C:\Users\sunrise\AppData\Local\rxyy-tools\live\rxyy-mcp"
+        live = r"C:\Users\TestUser\AppData\Local\rxyy-tools\live\rxyy-mcp"
         cfg = {"team_seats": {live: [], WS1: [{"id": "a"}]},
                "team_boards": {live: {"text": "x"}}}
         bulletin = {live: [], "_scopes": {}}
@@ -55,7 +55,7 @@ class SanitizeWsPathTests(unittest.TestCase):
         s.cwd = WS1
         s.task_root = WS1
         s.rev = 1
-        live = r"C:\Users\sunrise\AppData\Local\rxyy-tools\live\rxyy-mcp"
+        live = r"C:\Users\TestUser\AppData\Local\rxyy-tools\live\rxyy-mcp"
         self.assertFalse(hub.apply_session_cwd(s, live))
         self.assertEqual(WS1, s.cwd)
         s.cwd = live
